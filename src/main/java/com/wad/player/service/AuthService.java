@@ -36,7 +36,12 @@ public class AuthService {
             Map<String, String> body = Map.of("token", cleanToken);
             HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
-            String username = restTemplate.postForObject(url, request, String.class);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = restTemplate.postForObject(url, request, Map.class);
+            if (response == null || !Boolean.TRUE.equals(response.get("valid"))) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token invalide");
+            }
+            String username = (String) response.get("username");
             if (username == null || username.isBlank()) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token invalide");
             }
